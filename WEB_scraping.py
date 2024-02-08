@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+import csv
+
 url = "https://www.gov.uk/search/news-and-communications"
 page = requests.get(url)
 #html_code = page.text
@@ -14,9 +16,21 @@ descriptions = soup.find("p", class_="gem-c-document-list__item-description")
 titres_textes = []
 for titre in titres:
     titres_textes.append(titre.string)
-print(titres_textes)
+#print(titres_textes)
+
 
 descriptions_textes = []
 for description in descriptions:
     descriptions_textes.append(description.string)
-print(descriptions_textes)
+#print(descriptions_textes)
+
+
+en_tete = ["titre", "description"]
+with open("data.csv", "w") as csv_file:
+    writer = csv.writer(csv_file, delimiter=",")
+    writer.writerow(en_tete)
+    for titre, description in zip(titres_textes, descriptions_textes):
+        writer.writerow([titre, description])
+
+
+
