@@ -6,6 +6,7 @@ url = "https://www.gov.uk/search/news-and-communications"
 
 page = requests.get(url)
 page_content = page.content
+print("Statut code:", page.status_code)
 soup = BeautifulSoup(page_content,"html.parser")
 print(soup.title.string)
 class_name = "govuk-link"
