@@ -20,7 +20,7 @@ def get_web_html (url:str) -> str :
     page_html = response.text
     return page_html
 
-def get_job_info(soup:BeautifulSoup, offer_link)->list:
+def get_job_info(soup:BeautifulSoup,)->list:
     """
     obtain information relating to the job offer
 
@@ -49,7 +49,7 @@ def get_job_info(soup:BeautifulSoup, offer_link)->list:
     column_names = ["job_title", "tags", "description"]
     return job_data, column_names
 
-def csv_file(new_line:list, columns:list, csv_path:str)-> str:
+def csv_file(job_data, column_names, csv_path):
     """
     Writes a new line in csv format to the specified file path.
 
@@ -90,7 +90,7 @@ def scrape_data_from_job_offer(offer_link:str, job_offers_csv_path)-> str:
     soup = BeautifulSoup(web_page_html, "lxml")
 
     # accessing different elements on the page
-    job_data , columns_names = get_job_info(soup, offer_link)
+    job_data , columns_names = get_job_info(soup)
 
     # save the results to csv file
     csv_file(job_data, columns_names, job_offers_csv_path)
