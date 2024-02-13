@@ -29,20 +29,19 @@ def get_web_html (offer_link:str) -> str :
 
 def get_job_info(soup:BeautifulSoup,)->list:
     """
-    obtain information relating to the job offer
+    obtain informations relating to the job offer
 
-    :param soup: the soup object obtained
-    :param offer_link: used the offer link
+    :param soup(Beautifulsoup): the soup object obtained
 
     :return: job_data, column_names
     """
     # getting title
-    job_title = soup.title.text
+    job_title = soup.title.string
     print(job_title)
 
     # getting mainly tag
     tags = soup.find("div", {"class": "row permalink-infos d-flex align-items-center px-3"})
-    job_tags = tags.text
+    job_tags = tags.string
     print(job_tags)
 
     # job offer description
