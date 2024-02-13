@@ -16,6 +16,13 @@ def get_web_html (offer_link:str) -> str :
     """
     # type GET request
     response = requests.get(offer_link)
+    # Check if the HTTP request was successful (status code 200)
+    if response.status_code == 200:
+        html = response.text
+        with open("job.html", "w") as f:
+            # Write the HTML content to the "job.html" file
+            f.write(html)
+
     # content of response
     page_html = response.text
     return page_html
