@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-def get_web_html (url:str) -> str :
+def get_web_html (offer_link:str) -> str :
     """
     Sends an http get request to the specified URL, retrieves
     the textual content of the response and returns it as a string.
@@ -49,7 +49,7 @@ def get_job_info(soup:BeautifulSoup,)->list:
     column_names = ["job_title", "tags", "description"]
     return job_data, column_names
 
-def csv_file(job_data, column_names, csv_path):
+def csv_add_line (job_data: list , column_names: list, csv_path: str)->str:
     """
     Writes a new line in csv format to the specified file path.
 
@@ -72,10 +72,9 @@ def csv_file(job_data, column_names, csv_path):
             writer.writerow(column_names)
         # add data for the offer
         writer.writerow(job_data)
-
         # close automatically the file
 
-def scrape_data_from_job_offer(offer_link:str, job_offers_csv_path)-> str:
+def scrape_data_from_job_offer(offer_link:str, job_offers_csv_path: str )-> str:
     """
     scrapes information from a job offer webpage and saves it to a csv file.
 
@@ -90,10 +89,10 @@ def scrape_data_from_job_offer(offer_link:str, job_offers_csv_path)-> str:
     soup = BeautifulSoup(web_page_html, "lxml")
 
     # accessing different elements on the page
-    job_data , columns_names = get_job_info(soup)
+    job_data, columns_names = get_job_info(soup)
 
     # save the results to csv file
-    csv_file(job_data, columns_names, job_offers_csv_path)
+    csv_add_line(job_data, columns_names, job_offers_csv_path)
 
 # parameters
 offer_link = "https://www.jobijoba.com/fr/annonce/54/26e1c6007076b02ca4ca43b4d7d3f51b"
