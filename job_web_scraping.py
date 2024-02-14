@@ -2,104 +2,79 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-def get_web_html (offer_link:str) -> str :
-    """
-    Sends an http get request to the specified URL, retrieves
-    the textual content of the response and returns it as a string.
+
+class JobScraper:
+    def __init__(self, offer_link):
+        """
+        Initializes an instance of JobScraper with the job offer URL.
+
+        Args:
+            offer_link (str): The URL of the job offer.
+        """
+        self.offer_link = offer_link
+
+    def get_web_html(self):
+        """
+        Retrieves the HTML content of the job offer web page.
+
+        Returns:
+            str: The HTML content of the page.
+        """
+        response = requests.get(self.offer_link)
+        if response.status_code == 200:
+            html = response.text
+            with open("job.html", "w") as f:
+                f.write(html)
+            return html
+        else:
+            return None
+    def get_job_info(self, soup):
+        """
+        Extracts job information from a BeautifulSoup object.
+
+        Args:
+            soup (BeautifulSoup): The BeautifulSoup object containing the HTML code of the page.
+
+        Returns:
+            tuple: A tuple containing job data and column names.
+        """
+        job_title = soup.title.string
+        tags = soup.find("div", {"class": "row permalink-infos d-flex align-items-center px-3"})
+        job_tags = tags.string
+        description = soup.find("p", {"class": "permalink-description"})
+        job_description = description.text.replace(",", " ")
+        return [job_title, job_tags, job_description], ["job_title", "tags", "description"]
+
+    def csv_add_line(self, job_data, column_names, csv_path):
+        """
+        Adds a new line to the CSV file with the provided data.
+
+        Args:
+            job_data (list): List of job data.
+            column_names (list): List of column names for the CSV file.
+            csv_path (str): Path of the CSV file.
+        """
+        with open(csv_path, "a", encoding="utf-8", newline="") as csv_file:
+            writer = csv.writer(csv_file, delimiter=";")
+            if csv_file.tell() == 0:
+                writer.writerow(column_names)
+            writer.writerow(job_data)
+
+    def scrape_data_from_job_offer(self, job_offers_csv_path):
+        """
+        Scrapes job offer information and saves it to a CSV file.
+
+        Args:
+            job_offers_csv_path (str): Path of the CSV file.
+        """
+        web_page_html = self.get_web_html()
+        if web_page_html:
+            soup = BeautifulSoup(web_page_html, "lxml")
+            job_data, columns_names = self.get_job_info(soup)
+            self.csv_add_line(job_data, columns_names, job_offers_csv_path)
 
 
-    Args:
-        url(str): the url to send the request to
-
-    Returns:
-        str: The text content of the http response
-    """
-    # type GET request
-    response = requests.get(offer_link)
-    # Check if the HTTP request was successful (status code 200)
-    if response.status_code == 200:
-        html = response.text
-        with open("job.html", "w") as f:
-            # Write the HTML content to the "job.html" file
-            f.write(html)
-
-    # content of response
-    page_html = response.text
-    return page_html
-
-def get_job_info(soup:BeautifulSoup,)->list:
-    """
-    obtain informations relating to the job offer
-
-    :param soup(Beautifulsoup): the soup object obtained
-
-    :return: job_data, column_names
-    """
-    # getting title
-    job_title = soup.title.string
-    print(job_title)
-
-    # getting mainly tag
-    tags = soup.find("div", {"class": "row permalink-infos d-flex align-items-center px-3"})
-    job_tags = tags.string
-    print(job_tags)
-
-    # job offer description
-    description = soup.find("p", {"class": "permalink-description"})
-    job_description = description.text.replace(",", " ")
-    print(job_description)
-
-    # organizing data into a list
-    job_data = [job_title, job_tags, job_description]
-    # organizing columns_names into a list
-    column_names = ["job_title", "tags", "description"]
-    return job_data, column_names
-
-def csv_add_line (job_data: list , column_names: list, csv_path: str)->str:
-    """
-    Writes a new line in csv format to the specified file path.
-
-    :param new_line: A list of values to add as a new row
-    :param columns: A list of columns names for the csv file
-    :param csv_path: The file path of the csv file to write
-
-    If the csv file does not exist, this function will
-    create it and write the columns names before adding
-    the new line. If already exists, this function will
-    append the new line to the end of file.
-
-    :return: None
-    """
-    with open("job_offers.csv", "w", encoding="utf-8", newline="") as csv_file:
-        # create a writer object
-        writer = csv.writer(csv_file, delimiter=";")
-        # add a line with columns
-        if csv_file.tell() == 0:
-            writer.writerow(column_names)
-        # add data for the offer
-        writer.writerow(job_data)
-        # close automatically the file
-
-def scrape_data_from_job_offer(offer_link:str, job_offers_csv_path: str )-> str:
-    """
-    scrapes information from a job offer webpage and saves it to a csv file.
-
-    :param offer_link (str): URL of job offer web page
-    :param job_offers_csv_path (str): The path of the csv file
-    :return:
-    """
-    # Get the html code with the page
-    web_page_html = get_web_html(offer_link)
-
-    # initialize a BS object
-    soup = BeautifulSoup(web_page_html, "lxml")
-
-    # accessing different elements on the page
-    job_data, columns_names = get_job_info(soup)
-
-    # save the results to csv file
-    csv_add_line(job_data, columns_names, job_offers_csv_path)
-
-# parameters
+# Parameters
 offer_link = "https://www.jobijoba.com/fr/annonce/54/26e1c6007076b02ca4ca43b4d7d3f51b"
-scrape_data_from_job_offer(offer_link, "job_offers.csv")
+job_scraper = JobScraper(offer_link)
+job_scraper.scrape_data_from_job_offer("job_offers.csv")
